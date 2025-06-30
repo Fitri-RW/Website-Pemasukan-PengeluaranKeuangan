@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Pencatat Keuangan</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #8b1e3f, #c23a53);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 380px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #8b1e3f;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #a64064;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group svg {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      fill: #8b1e3f;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    a {
+      color: #8b1e3f;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Pencatat Keuangan Style */
+    #main-section {
+      width: 90%;
+      max-width: 800px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    td {
+      background-color: #fff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .edit-btn, .hapus-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 14px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #d32f2f;
+    }
+
+    .hapus-btn {
+      background-color: #f44336;
+    }
+
+    #totalPemasukan, #total, #saldo {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="register-section">
+  <h2>Register</h2>
+  <input type="text" id="reg-username" placeholder="Username">
+  <div class="input-group">
+    <input type="password" id="reg-password" placeholder="Password">
+    <svg onclick="togglePassword('reg-password')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      <circle cx="12" cy="12" r="2.5"/>
+    </svg>
+  </div>
+  <button onclick="register()">Daftar</button>
+  <div class="link">Sudah punya akun? <a onclick="showLogin()">Login di sini</a></div>
+</div>
+
+<div class="container hidden" id="login-section">
+  <h2>Login</h2>
+  <input type="text" id="log-username" placeholder="Username">
+  <div class="input-group">
+    <input type="password" id="log-password" placeholder="Password">
+    <svg onclick="togglePassword('log-password')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      <circle cx="12" cy="12" r="2.5"/>
+    </svg>
+  </div>
+  <button onclick="login()">Login</button>
+  <div class="link">Belum punya akun? <a onclick="showRegister()">Daftar di sini</a></div>
+</div>
+
+<div class="container hidden" id="main-section">
+  <h2>Pencatat Pemasukan dan Pengeluaran Keuangan</h2>
+
+  <label for="tanggal">Tanggal:</label>
+  <input type="date" id="tanggal">
+
+  <label for="deskripsi">Deskripsi:</label>
+  <input type="text" id="deskripsi" placeholder="Contoh: Gaji, Makan">
+
+  <label for="jumlah">Jumlah (Rp):</label>
+  <input type="number" id="jumlah" placeholder="Contoh: 15000">
+
+  <label for="tipe">Tipe:</label>
+  <select id="tipe">
+    <option value="pemasukan">Pemasukan</option>
+    <option value="pengeluaran">Pengeluaran</option>
+  </select>
+
+  <button onclick="tambahCatatan()">Tambah Catatan</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Deskripsi</th>
+        <th>Jumlah</th>
+        <th>Tipe</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="catatanBody"></tbody>
+  </table>
+
+  <div id="totalPemasukan">Total Pemasukan: Rp 0</div>
+  <div id="total">Total Pengeluaran: Rp 0</div>
+  <div id="saldo">Saldo: Rp 0</div>
+</div>
+
+<script>
+  let totalPengeluaran = 0;
+  let totalPemasukan = 0;
+  let editingRow = null;
+
+  function showLogin() {
+    document.getElementById('register-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+  }
+
+  function showRegister() {
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('register-section').classList.remove('hidden');
+  }
+
+  function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+  }
+
+  function register() {
+    const user = document.getElementById("reg-username").value;
+    const pass = document.getElementById("reg-password").value;
+    if (!user || !pass) {
+      alert("Isi semua data!");
+      return;
+    }
+    localStorage.setItem("username", user);
+    localStorage.setItem("password", pass);
+    alert("Akun berhasil dibuat!");
+    showLogin();
+  }
+
+  function login() {
+    const user = document.getElementById("log-username").value;
+    const pass = document.getElementById("log-password").value;
+    const savedUser = localStorage.getItem("username");
+    const savedPass = localStorage.getItem("password");
+    if (user === savedUser && pass === savedPass) {
+      document.getElementById("login-section").classList.add("hidden");
+      document.getElementById("main-section").classList.remove("hidden");
+    } else {
+      alert("Username atau password salah!");
+    }
+  }
+
+  function formatRupiah(nilai) {
+    return nilai.toLocaleString("id-ID");
+  }
+
+  function updateTotal() {
+    const rows = document.querySelectorAll("#catatanBody tr");
+    totalPengeluaran = 0;
+    totalPemasukan = 0;
+
+    rows.forEach(row => {
+      const jumlahText = row.cells[2].innerText.replace("Rp ", "").replace(/\./g, "").replace(",", "");
+      const tipe = row.cells[3].innerText;
+      const jumlah = parseInt(jumlahText);
+      if (tipe === "Pengeluaran") totalPengeluaran += jumlah;
+      if (tipe === "Pemasukan") totalPemasukan += jumlah;
+    });
+
+    document.getElementById("totalPemasukan").innerText = "Total Pemasukan: Rp " + formatRupiah(totalPemasukan);
+    document.getElementById("total").innerText = "Total Pengeluaran: Rp " + formatRupiah(totalPengeluaran);
+    document.getElementById("saldo").innerText = "Saldo: Rp " + formatRupiah(totalPemasukan - totalPengeluaran);
+  }
+
+  function tambahCatatan() {
+    const tanggal = document.getElementById("tanggal").value;
+    const deskripsi = document.getElementById("deskripsi").value;
+    const jumlah = parseInt(document.getElementById("jumlah").value);
+    const tipe = document.getElementById("tipe").value;
+
+    if (!tanggal || !deskripsi || isNaN(jumlah)) {
+      alert("Mohon isi semua kolom.");
+      return;
+    }
+
+    const table = document.getElementById("catatanBody");
+
+    if (editingRow) {
+      editingRow.cells[0].innerText = tanggal;
+      editingRow.cells[1].innerText = deskripsi;
+      editingRow.cells[2].innerText = "Rp " + formatRupiah(jumlah);
+      editingRow.cells[3].innerText = tipe === "pengeluaran" ? "Pengeluaran" : "Pemasukan";
+      editingRow = null;
+      document.querySelector("button[onclick='tambahCatatan()']").innerText = "Tambah Catatan";
+    } else {
+      const row = table.insertRow();
+      row.insertCell(0).innerText = tanggal;
+      row.insertCell(1).innerText = deskripsi;
+      row.insertCell(2).innerText = "Rp " + formatRupiah(jumlah);
+      row.insertCell(3).innerText = tipe === "pengeluaran" ? "Pengeluaran" : "Pemasukan";
+      const aksi = row.insertCell(4);
+      aksi.classList.add("actions");
+      aksi.innerHTML = `
+        <button class="edit-btn" onclick="editCatatan(this)">Edit</button>
+        <button class="hapus-btn" onclick="hapusCatatan(this)">Hapus</button>
+      `;
+    }
+
+    document.getElementById("tanggal").value = '';
+    document.getElementById("deskripsi").value = '';
+    document.getElementById("jumlah").value = '';
+    document.getElementById("tipe").value = 'pengeluaran';
+
+    updateTotal();
+  }
+
+  function editCatatan(button) {
+    const row = button.parentNode.parentNode;
+    editingRow = row;
+    document.getElementById("tanggal").value = row.cells[0].innerText;
+    document.getElementById("deskripsi").value = row.cells[1].innerText;
+    document.getElementById("jumlah").value = row.cells[2].innerText.replace("Rp ", "").replace(/\./g, "");
+    document.getElementById("tipe").value = row.cells[3].innerText === "Pengeluaran" ? "pengeluaran" : "pemasukan";
+    document.querySelector("button[onclick='tambahCatatan()']").innerText = "Simpan Perubahan";
+  }
+
+  function hapusCatatan(button) {
+    const row = button.parentNode.parentNode;
+    row.remove();
+    updateTotal();
+  }
+</script>
+
+</body>
+</html>
